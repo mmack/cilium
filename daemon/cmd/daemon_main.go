@@ -815,6 +815,9 @@ func init() {
 	flags.Int(option.FragmentsMapEntriesName, defaults.FragmentsMapEntries, "Maximum number of entries in fragments tracking map")
 	option.BindEnv(option.FragmentsMapEntriesName)
 
+	flags.Int(option.LBMapEntriesName, defaults.LBMapEntries, "Maximum number of entries in Cilium BPF lbmap")
+	option.BindEnv(option.LBMapEntriesName)
+
 	viper.BindPFlags(flags)
 
 	CustomCommandHelpFormat(RootCmd, option.HelpFlagSections)

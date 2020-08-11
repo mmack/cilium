@@ -802,6 +802,15 @@ const (
 
 	// K8sEnableAPIDiscovery
 	K8sEnableAPIDiscovery = "enable-k8s-api-discovery"
+
+	// LBMapEntriesName configures max entries for BPF lbmap.
+	LBMapEntriesName = "bpf-lb-map-max"
+
+	// LBMapMinEntries defines the minimum lbmap limit.
+	LBMapMinEntries = 1 << 10 // 1Ki entries
+
+	// LBMapMaxEntries defines the maximum lbmap limit.
+	LBMapMaxEntries = 1 << 24 // 16Mi entries
 )
 
 // HelpFlagSections to format the Cilium Agent help template.
@@ -831,6 +840,7 @@ var HelpFlagSections = []FlagsSection{
 			EnableBPFClockProbe,
 			EnableBPFMasquerade,
 			EnableIdentityMark,
+			LBMapEntriesName,
 		},
 	},
 	{
@@ -1886,6 +1896,9 @@ type DaemonConfig struct {
 	// election purposes in HA mode.
 	// This is only enabled for cilium-operator
 	k8sEnableLeasesFallbackDiscovery bool
+
+	// LBMapEntries is the maximum number of entries allowed in BPF lbmap.
+	LBMapEntries int
 }
 
 var (
@@ -2742,6 +2755,15 @@ func (c *DaemonConfig) checkMapSizeLimits() error {
 			c.FragmentsMapEntries, FragmentsMapMax)
 	}
 
+	if c.LBMapEntries < LBMapMinEntries {
+		return fmt.Errorf("specified LBMap max entries %d must exceed minimum %d",
+			c.LBMapEntries, LBMapMinEntries)
+	}
+	if c.LBMapEntries > LBMapMaxEntries {
+		return fmt.Errorf("specified LBMap max entries %d must not exceed maximum %d",
+			c.LBMapEntries, LBMapMaxEntries)
+	}
+
 	return nil
 }
 
@@ -2768,6 +2790,7 @@ func (c *DaemonConfig) calculateBPFMapSizes() error {
 	c.NeighMapEntriesGlobal = viper.GetInt(NeighMapEntriesGlobalName)
 	c.PolicyMapEntries = viper.GetInt(PolicyMapEntriesName)
 	c.SockRevNatEntries = viper.GetInt(SockRevNatEntriesName)
+	c.LBMapEntries = viper.GetInt(LBMapEntriesName)
 
 	// Don't attempt dynamic sizing if any of the sizeof members was not
 	// populated by the daemon (or any other caller).

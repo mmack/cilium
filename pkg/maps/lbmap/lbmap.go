@@ -20,6 +20,7 @@ import (
 	"strconv"
 
 	"github.com/cilium/cilium/pkg/bpf"
+	"github.com/cilium/cilium/pkg/defaults"
 	"github.com/cilium/cilium/pkg/loadbalancer"
 	"github.com/cilium/cilium/pkg/logging"
 	"github.com/cilium/cilium/pkg/logging/logfields"
@@ -31,9 +32,9 @@ import (
 
 var log = logging.DefaultLogger.WithField(logfields.LogSubsys, "map-lb")
 
-const (
-	// Maximum number of entries in each hashtable
-	MaxEntries = 65536
+var (
+	// MaxEntries is the maximum number of entries in each hashtable
+	MaxEntries = defaults.LBMapEntries
 )
 
 // LBBPFMap is an implementation of the LBMap interface.
@@ -469,4 +470,12 @@ func (svcs svcMap) addFEnBE(fe *loadbalancer.L3n4AddrID, be *loadbalancer.Backen
 
 	svcs[hash] = lbsvc
 	return &lbsvc
+}
+
+// InitMapInfo updates the map info defaults for sock rev nat {4,6} and lb maps.
+func InitMapInfo(maxSockRevNatEntries, lbMapMaxEntries int) {
+	MaxSockRevNat4MapEntries = maxSockRevNatEntries
+	MaxSockRevNat6MapEntries = maxSockRevNatEntries
+
+	MaxEntries = lbMapMaxEntries
 }

@@ -268,6 +268,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 		CTMapEntriesGlobalAny int
 		NATMapEntriesGlobal   int
 		PolicyMapEntries      int
+		LBMapEntries          int
 		FragmentsMapEntries   int
 		NeighMapEntriesGlobal int
 		SockRevNatEntries     int
@@ -285,6 +286,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				CTMapEntriesGlobalAny: CTMapEntriesGlobalAnyDefault,
 				NATMapEntriesGlobal:   NATMapEntriesGlobalDefault,
 				PolicyMapEntries:      defaults.PolicyMapEntries,
+				LBMapEntries:          defaults.LBMapEntries,
 				FragmentsMapEntries:   defaults.FragmentsMapEntries,
 				NeighMapEntriesGlobal: NATMapEntriesGlobalDefault,
 				SockRevNatEntries:     SockRevNATMapEntriesDefault,
@@ -294,6 +296,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				CTMapEntriesGlobalAny: CTMapEntriesGlobalAnyDefault,
 				NATMapEntriesGlobal:   NATMapEntriesGlobalDefault,
 				PolicyMapEntries:      defaults.PolicyMapEntries,
+				LBMapEntries:          defaults.LBMapEntries,
 				FragmentsMapEntries:   defaults.FragmentsMapEntries,
 				NeighMapEntriesGlobal: NATMapEntriesGlobalDefault,
 				SockRevNatEntries:     SockRevNATMapEntriesDefault,
@@ -307,6 +310,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				CTMapEntriesGlobalAny: 18000,
 				NATMapEntriesGlobal:   2048,
 				PolicyMapEntries:      512,
+				LBMapEntries:          1 << 14,
 				SockRevNatEntries:     18000,
 				FragmentsMapEntries:   2 << 14,
 			},
@@ -315,6 +319,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				CTMapEntriesGlobalAny: 18000,
 				NATMapEntriesGlobal:   2048,
 				PolicyMapEntries:      512,
+				LBMapEntries:          1 << 14,
 				SockRevNatEntries:     18000,
 				FragmentsMapEntries:   2 << 14,
 				WantErr:               false,
@@ -388,6 +393,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				NATMapEntriesGlobal:   NATMapEntriesGlobalDefault,
 				SockRevNatEntries:     4096,
 				PolicyMapEntries:      defaults.PolicyMapEntries,
+				LBMapEntries:          defaults.LBMapEntries,
 				FragmentsMapEntries:   defaults.FragmentsMapEntries,
 			},
 			want: sizes{
@@ -395,6 +401,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				CTMapEntriesGlobalAny: 4096,
 				NATMapEntriesGlobal:   (2048 + 4096) * 2 / 3,
 				PolicyMapEntries:      defaults.PolicyMapEntries,
+				LBMapEntries:          defaults.LBMapEntries,
 				SockRevNatEntries:     4096,
 				FragmentsMapEntries:   defaults.FragmentsMapEntries,
 				WantErr:               false,
@@ -435,6 +442,26 @@ func TestCheckMapSizeLimits(t *testing.T) {
 			},
 		},
 		{
+			name: "LB map size below range",
+			d: &DaemonConfig{
+				LBMapEntries: LBMapMinEntries - 1,
+			},
+			want: sizes{
+				LBMapEntries: LBMapMinEntries - 1,
+				WantErr:      true,
+			},
+		},
+		{
+			name: "LB map size above range",
+			d: &DaemonConfig{
+				LBMapEntries: LBMapMaxEntries + 1,
+			},
+			want: sizes{
+				LBMapEntries: LBMapMaxEntries + 1,
+				WantErr:      true,
+			},
+		},
+		{
 			name: "Fragments map size below range",
 			d: &DaemonConfig{
 				FragmentsMapEntries: FragmentsMapMin - 1,
@@ -464,6 +491,7 @@ func TestCheckMapSizeLimits(t *testing.T) {
 				CTMapEntriesGlobalAny: tt.d.CTMapEntriesGlobalAny,
 				NATMapEntriesGlobal:   tt.d.NATMapEntriesGlobal,
 				PolicyMapEntries:      tt.d.PolicyMapEntries,
+				LBMapEntries:          tt.d.LBMapEntries,
 				FragmentsMapEntries:   tt.d.FragmentsMapEntries,
 				NeighMapEntriesGlobal: tt.d.NeighMapEntriesGlobal,
 				SockRevNatEntries:     tt.d.SockRevNatEntries,

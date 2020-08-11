@@ -397,4 +397,8 @@ const (
 	// for the support of Leases in Kubernetes when there is an error in discovering
 	// API groups using Discovery API.
 	K8sEnableLeasesFallbackDiscovery = false
+
+	// LBMapEntries contains the default number of entries that are allowed in cilium
+	// LB service, backend and affinity maps.
+	LBMapEntries = 65536
 )

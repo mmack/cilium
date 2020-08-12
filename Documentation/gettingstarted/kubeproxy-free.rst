@@ -706,6 +706,31 @@ and therefore not affecting any application pod ``bind(2)`` requests anymore. In
 order to opt-out from this behavior in general, this setting can be changed for
 expert users by switching ``global.nodePort.bindProtection`` to ``false``.
 
+.. _Configuring Maps:
+
+Configuring BPF map sizes
+*************************
+
+For high-scale environments, Cilium's BPF maps can be configured to have higher
+limits on the number of entries. Overriding helm options can be used to tweak
+these limits.
+
+To increase the number of entries in Cilium's BPF LB service, backend and
+affinity maps consider overriding ``global.bpf.lbMapMax`` helm option.
+The default value of this LB map size is 65536.
+
+.. note::
+
+   Scaling size of Cilium's BPF LB map comes with a limitation that the Reverse NAT
+   map key is only 16 bits that cannot scale beyond 65536 entries.
+
+.. parsed-literal::
+
+    helm install cilium |CHART_RELEASE| \\
+        --namespace kube-system \\
+        --set global.kubeProxyReplacement=strict \\
+        --set global.bpf.lbMapMax=131072
+
 .. _kubeproxyfree_hostport:
 
 Container hostPort support
